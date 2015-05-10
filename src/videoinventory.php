@@ -13,43 +13,60 @@
       $hostname = 'oniddb.cws.oregonstate.edu';
       $databaseName = 'takahasb-db';
       $username = 'takahasb-db';
-      $password = '9D5KAZisXHORComp';
+      $password = '9D5KAZisXHORComp'; // include confidential.php later
 
       $mydata = new mysqli($hostname, $username, $password, $databaseName);
-      if ($mydata->connect_errorno){
-        echo "Couldn't connect to MySQL: (" . $mydata->connect_errorno . ")" . $mydata->connect_error;
+      if ($mydata->connect_errno){
+        echo "Couldn't connect to MySQL: (" . $mydata->connect_errno . ")" . $mydata->connect_error;
         echo "program terminates.";
         die();
       }
+      /* if (!$mydata->query("CREATE TABLE videos(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR (255) UNIQUE NOT NULL, category VARCHAR (255) NOT NULL, length INT UNSIGNED NOT NULL DEFAULT 0, rented BOOL NOT NULL DEFAULT 0)")){
+          echo "Couldn't make a table: (" . $madata->errno . ")" . $mydata->error;
+          echo "program terminates.";
+          die();
+        }*/
+
+      if ($_GET){
+
+        if (!($stmt = $mydata->prepare("INSERT INTO videos(name, category, length) VALUES (?, ?, ?)"))){
+          echo "Prepare failed: (" . $mydata->errno . ")" . $mydata->error;
+          echo "program terminates.";
+          die();
+        }
+
+        $name = $_GET["name"];
+        $category = $_GET["category"];
+        $length = $_GET["length"];
       
-      if (!$mydta->query("CREATE TABLE videos(id INT PRIMARY KEY, name VARCHAR (255) UNIQUE NOT NULL, category VARCHAR (255) NOT NULL, length INT UNSIGNED, rented TINYINT )")){
-        echo "Couldn't make a table: (" . $madata->errorno . ")" . $mydata->error;
-        echo "program terminates.";
-        die();
+        if(!$stmt->bind_param('ssi', $name, $category, $length)){
+          echo "Binding parameters failed: (" . $mydata->errno . ")" . $mydata->error;
+        }
+
+        if (!$stmt->execute()){
+          echo "execute failed :(" . $mydata->errno . ")" . $mydata->error;
+        }
+
+
+
+
+
+
       }
-
-
 
       ?>
 
-    <!--  <form action= "http://web.engr.oregonstate.edu/~osterbit/2/repo/class-content/form_tests/Formtest.php" method= "get">
-        GET FORM
+      <form action= "http://web.engr.oregonstate.edu/~takahasb/videoinventory.php" method= "get">
+      
+        Name:<input type= "text" name= "name" required>
         <br>
-        Text here:<input type= "text" name= "text_input">
+        Category:<input type= "text" name= "category" required>
         <br>
-        Number here:<input type= "number" name= "numerical_input">
+        Length:<input type= "number" name= "length" min= "0" required>
         <br>
-        Password here:<input type= "password" name= "password_input">
-        <br>
-        Select between:
-        <br>
-        Snickers<input type="radio" name="candy" value="Snickers" checked>
-        <br>
-        Skittles<input type="radio" name="candy" value="Skittles" checked>
-        <br>
-        Mentos<input type="radio" name="candy" value="Mentos" checked>
-        <input type= "submit">
+       
+        <input type= "submit" value= "Add"> </input>
       </form>
-      -->
+      
   </body>
 </html>
